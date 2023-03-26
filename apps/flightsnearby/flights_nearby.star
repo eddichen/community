@@ -21,8 +21,10 @@ DEFAULT_LOCATION = json.encode({
     "place_id": "",
     "timezone": "",
 })
-DEFAULT_DISTANCE = "10"
+DEFAULT_DISTANCE = "25"
 DEFAULT_CACHE = 180
+# earth's radius (km)
+R = 6378.1
 FLIGHT_RADAR_URL = "https://flight-radar1.p.rapidapi.com/flights/list-in-boundary"
 TAILS = {
     "AA": base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAMAAAAM7l6QAAACTFBMVEUAAAC5IBizHxi7yc3Qcm+3HBcLZrDV7fHYubaoKiu1AgD78Oa7HBIAZrW+BAC6UUwVYaPVBwDANzHZ//+9DQNtm73EHhMhdLPBOzUHc7nH3+O4KCADWqUmS4b////QHAzezMsAXqponMU7fLO+hIHFKyITY6azBgC0HBTBHRTAKyNqfqEFUJa2KyfTSUBIg7bJl5nEYVvKvr4AVJ+tqr3CHBBUeqYNa7B3pM3FIBW8vcXp3tNejLXB3eSuo62okZ0LX6TCIBfLeHa5AADe9vnI5Oj46uL///+9AADH5enDWlLaBADK8vnJ8PYAUqnqa2LaOzHX/v59rtPhzM10ocVcksFGjr8terYteLQAVq0ARZi/Fw3DDgK4BQDG5utxostfm8t+pMpglsbKwcNqmcIjgsIAX8I9fbfit7UHarEAWq0zcqoASZ0API6+jIoAPojHHxL6///X+v/o//zH8fdkt+xvxOtxvOnE4eb16+R1uOHe3duDtNhQmdOfv9FeoNEAetFzps5Xms7w0c3hy8t3ochnocg1jshFjMdgnsZynMYegsZ6oMFjlb1BibzqvLrXvLpqlbgAXbXgvLQPZ7PotbIldrL4t61dhq0FY6wmbqoRY6dJd6ZDdaY5caUVYqIoZqFZd50sYZuYgZgqW5ZQa5UdVJLEjYnSi4QAOITMhIFUVXznbWTua2H/XkfkUT1lHDmNKzbZNy70PyzeNiviNiV2DyXCKR++Fgu4FAu3FAuXAwnmFQLVDQDICwC8BwD6AADmAADOAADBAAD3XlVqAAAAQnRSTlMA85F1PjgwFQgE+fj19PLw7enh3tvY0svFwL+5tLOvq6WjoZ6ampmZlJKNhH5+eHRxa2BbWFdWRDgvKB8fHBUSERAsRGa4AAABXUlEQVQoz2IYAGCuJiMrr6plil1WcWZmw8a9u3ZqYpXVXjSve/WeggIxR2yyZp0Te9smT0hONsImyxbpl5VWVhgYWMSORdZmxtw56UtXLM/LU8GmWSA7Ozx1+6HY2P2sWGTFM2fPz9pwMCZmnwgWWaWQkJCUnulTMzL6DTBldXLz81fm1hWX+Pr62mLImqSHhoZ2pDQHBwe3KGB6KSgxKKi8amtMdHT0Dkt0WcAceP0iIyelbTvgDQSCGJpF+8LCwtoXrvcCAUN0WcnUabMWLFtSHegDBL7oIaYcHhERHjGlxh0M5NBk9RO74uMbS1s3bwoAgi0sqLLGUVFROTl+fru9PYDgMB8niqxFU31CQlJS7eJ1a/yBYK0eiqw1txsEVLpAAAeyLIdwhSsEeMZ5AkGcFLIsp8QqJ1SA7DArIQ9nFODBhZC0Z+aPZUQFPLoIaTtmaXUmVKDBykAdAACNkHIoMAgDegAAAABJRU5ErkJggg=="""),
@@ -57,6 +59,303 @@ TAILS = {
     "WY": base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAMAAAAM7l6QAAABaFBMVEUAAAARLjUGERQMGh4HExYDCAkaRVEVOEESLzYMJCoMIicCCQsCBwkcTFcVOUIWOUIWO0QUND0HGiAKGh8JGBwFDQ8bSFMfU18eUV4DOkgmREgVLzYMKTElOToVN0AYP0kRLDMYQUoACBUPKC4CBAUcS1YaSVQZRVAbR1IfVGEkXm0aSFMiW2keTVkfUF0SQE4AMD6ViF2Tgk4ZQkwHPEmqpaSjoJ+dnZ2HjpAPRFYGPVABOUwYP0kGNULX0tHe09DGyMzCwsKwtre/uLaxsbOsrq64rq2jqKuXm52MkpNreX5Zc3i4onNCYGghWWefjmCmkV0LS1srUFeHflWki1QNPUkFOEX////v6uvm5OnV2dzH0NWqub3SwLurqKvHv6eanqWOmZzYvpZvi4xbgouLl4mRk4N4gYNSdYJcd35edHJFaHA3YGQ8WWGNhFx2d1m5mVYERVVja1OpjlI7WFJaZlEjR1BWYEbF0L7wAAAAJXRSTlMAeDBLQhTRrZ2IcyAZ4uHOtZ1jWVIo9/Xt7Ne1rqemmJGNfn0LgwOyzgAAAVhJREFUKM+10UVXw0AUBWCoUIcq7pBMJk2aNEnd3V1wd3f4+9C0i7QZdvC235k597079i+jUCpVCof6F1VZzGaNdlWJ1mWyCqELklakWkgMw3CnawqpelFxAupRaifpnjqxaTUqM+USvwZQi1D1LBSVAC4VgieogdKoYJpBLABQwXSNUCDwowRggDyYtXFdem8GgsEQe78kPyW1t11+rj8+vX5cXsgOasD3t3bdnLtWb5eP5mWP586j8Z0k9+Zucadn67KVXm6iyUQ81+LatVvGOLoSJdzFErl0+tj9xYQWR3SDxHDhJJbJew/zTIS2D6ut14OAZ1K+gi9b7E6iesDYSspT8GevgrohNc5A8Zag4/f4vN5mxyDVTVNVVCfBlg48xU9hQdaSqKBb8T+wEdomQYeJwmi63xPBsBGekAQzaiHE+w0DwPN8OBzGJcEMayvjo6MY+5v5BvEFQA+08zvBAAAAAElFTkSuQmCC"""),
 }
 
+SHAPES = {
+    "airliner" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAABkAAAAaCAYAAABCfffNAAAACXBIWXMAAAsTAAALEwEAmpwYAAABoElEQVR4nLWWzytEURTHPxJlirCRFVKSsLG0siAWlAghKaJsZM3SVv4GZYGy01iQspkiC6GI/EjIj5CGQpnRqaNut94089x76jTvvXv6fpp77vm+B5nFMHAGjOMxYkAS2PUFyAUuFXID5PmA1ABPCokDdT4grcCPQiS7fUB6DYDkiA/IqAWZdCXcAcwD+cCUBZkGIrreFxZQCFyr4BywYEGWgBm9fgRKw0DKgHMVkVP1aUG+gHu9fgVqw0AGgTtLOBmQ79qjrHTFG4EtYybSzThwCAykEm8ANowtCJtxYB9oMsUrgTXg1iiUobsCNoFFbfqOJRbTNcl1rU8Y67IT23/OsKcPv4FTBYrLFlj/dMiCjFnrER3QVeBY9aTuAj2KKzoTOSm2s9+CiO0HRTbQojuwTAbRY0Hk9DmPTgsiXuY82q3GdvmANAMfCpDpb/MBqQIejOMpLzHnUWy8fuW3xDVAju+R0ZOEfrVMuBAXu48CbwEWIu4rrlD0H4iYpTT5GThQRxDxEzXDF7V8qQsd9cAsUK335Qqq0Ht5LutSFxi/+gyyYam3jLEAAAAASUVORK5CYII="),
+	"balloon" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAkAAAANCAYAAAB7AEQGAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAlklEQVR4nIWRMQrCQBBFX6e1F1BPHHMCLbWy8ATW0aCligiCvRdIlB//gK6E/fDZnZkHM7MLHw2BEtgDV6B2rHwnXbZAC7y+3Do/EDQDmgQIN65T9QDhnaBTBroIOmSgo6BlBloJmgL3HuDheqe5Vw745ngRgDTygLGEHlRW/kdr4GlI5yYFpCKZR9/yp7Hbqe0ZmETlDTwzUSa8btPHAAAAAElFTkSuQmCC"),
+	"cessna" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAABEAAAANCAYAAABPeYUaAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAuElEQVR4nKXTPUqDURCF4Wcx4hZSuRf3IbHKFqxT2FgIFiFoUKwSURSVEKIQ/GssVNyCYeB0oiHfd+AwcDn3Hbgzl/+1gTdsaqFz/OCsDeQukPtVwX46XeAWczzEX4F8YxE/JjfGCfYK8pJgUz8V5LUl5LkgHexiHyNcYxp/JPiOq/gyuQP0sLXqvSaBVG2s40CqNtZRIIdNLncz6s9Aqs6wsw5k8MckhutAtnGKmyxYLVd9gTr/pSUU4Fj7slB3KAAAAABJRU5ErkJggg=="),
+	"heavy_2e" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAABwAAAAdCAYAAAC5UQwxAAAACXBIWXMAAAsTAAALEwEAmpwYAAAB7ElEQVR4nL3Xz4vNYRTH8dc0KQvZEBYoKRJlMYqs/FpJSrKQDYmQlSIL5S+ws1BsJBYWLGxsJCYbJorkRyQ/ihFhBoPMXD11bp2+mTt35s53PnU23+/zPe/nnOec89zL+LUQj9CHeaZAl9EIOzcVwHsJ2DsVwGcJ+LBu2Ay8S8BX6K4TuAifE/AD5tQJXIpvCVjg8+sELsdgAn6JqCdVO3EYB7AW3xNwIKJeh01hHetJOP+IHfiZgD8i6hdpTcfqS85KS4wk4Ei8bwLfdo7jUgKMZXc6he2LXmsX+BRbJwIqvXW9UpHt2iCuYma7sEN4MwFQ1R5jTytQaeDbGBrFwd+oylw0jUrVNv4T7RXMqsKO4nVl8XBU3U2cQA92V9Jc1mzGShzBDbyMzWVf5dnBJuwsfseLoUhFOYO9MayzemK6NB39wbLKmunYhWvRRr9SJk6JyModdwFbMK1F2lfgUwKWDS5usb4bG3ER96M2rEaX9rQE/ZUzWtDmt80Nj0tlUL9PwHJzzFWjZlcGQX+cWW3qimmSq6929Sbg3bph26JtmsBS4fvrgh0bZeSVnxmnJ/vczuBrmi4D0RLDqanPj6O9WmpDNHix5zEGywi7heNRRAVYptWayQCux4PKPXcyUlxUotoe/zdWjeXtH0x25v3aNoXVAAAAAElFTkSuQmCC"),
+	"heavy_4e" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAABwAAAAeCAYAAAA/xX6fAAAACXBIWXMAAAsTAAALEwEAmpwYAAACDklEQVR4nL2WQUgUYRTHf4qk7S3CSwsaJKUERcKSSbjQuTxFnT3WxfDcscNGHkLBcx1EQ8VDnjp1EcWoQE3JstRLRpbIUmnrqrx4A4+Pmdmd3RkfPPjmm/d9v5n53vu/gejWArwB3gJnOQYbBQ7VXxwHcNYAZ5KG1QIfDfCTziVmZ4BvBvgdSCcJPA9sG6CMW5MEXgLyBijjK0kCM8CuAe4BnXECTgKn1CU57gL7BngA9Og9Ly5VDfC5ZuIacB9YNTDPvwL3NGYNGK8GOKab7gDrPjDPN4BfOn5ZDXAkBBLkk1F18pl6FhiuEJgBngIDpfT2plm4AGxWAMwD8+b6Vhjwjgm06R/V/5nx7TDgdSfY+pbz5J6/B34ErPkDdAXBmnSxXSA19w4Y1LO44dwv6kOeA4aARZ86nQaaXVi70wXEV4DHwAkTl/UBWqWpAx5qbdq4RRvX7dSYdIAJoDHgkxedL+AnbY26x5YjEJIj/z+ZTPzW1+8IOeNrQMFsUigRfxWYA/5qvPyWsKwu0lVDuF3WRLBJIR0kzGpU+j7rsfFTNyrH0j79sNwGfFFrlBzlW4OesQcUYaiPsL7fa0FRbNXJ5CiWquQXw6b8F63BRKwV+OCjJkv6ILFaWwDMQi/ECVsoQ7Bje9Oc0UXp7K+1puT8RCjsf+qjOIB9wJQW72mde2LKSeZ6gVfAg1K7HQGuoREsk9C9RwAAAABJRU5ErkJggg=="),
+	"helicopter" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAACXBIWXMAAAsTAAALEwEAmpwYAAABS0lEQVR4nJXUv0tWcRgF8E9KSUaL0Gj4DzSoVEsmOVmLe04uNikItjY3tr01iKtQm1IuKmjiILiE+DN/DmJFBSn1UpBcfd789nrR9z3wHe7hOefe73MOF/rwGldUjhq8RFf2MIafmMWNssFrqM/h3qKIuZLbK3zDIlpi8D7W8RG3g7uJefzGBK6nzv3YxSYexxf9jTONdizhB4ZQm3e3DqzgE74nBl+wjT08vWhBTVhIxKWzikeVbvl5jsGgKlDIMXhWqfheLKvcYAMPLxL3YgefI+eS+DDS2cdAnvASXuArttCDtcRgJfrxIWIshOYYV6ONxSjSrRPaSGIwHFzW1Pf4hXehlZXkD2bQ4BStyTXuJnwd3uAAUxnRHW+77H80JwZ35EfdmcP/Q1ti8OC8wTyULzGr8ZNqDLL/Q3kPRqsxaMQ4liPCyeDO4AgMIWrcMP0XoQAAAABJRU5ErkJggg=="),
+	"hi_perf" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAAA8AAAAVCAYAAACZm7S3AAAACXBIWXMAAAsTAAALEwEAmpwYAAAA8UlEQVR4nJ3Uu0oEMRQA0GOjKP6BooX4WxaCVlZWVn6FlR9hJSiCKFsslgsq6vrCRyMKgra6I4HsInEna+bCLWa4J5kkN0N9TKGNSQ1iEz1sNMFHqLBfCsdwFfFZKV7Ee8RvWCjByxH2c6kEbyd4qwTvJninBLcT3PovHMdlgs/j+2xMYA9fCQ7PB7lum46N8Z3A3wMcxrpBPOMCJ7Edq0z2cIwbPAZ8h48RKB3gE90+rhpkN+Cnhvg+4FWsJdlJCjtDalaG7foMThMcbtZc7ozDNVzHbc1nht0NP4hQ9ydm8TJina+Yr8MPuM5kmH2AfwBrKY/OYzAIYgAAAABJRU5ErkJggg=="),
+	"jet_nonswept" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA6klEQVR4nN3UL0tEQRSG8d9at1oMfgzzKuLn0GLYIKtZ7JYNZosYxKKyRUU2KJr8E0Qxia5JDSZdQRBWLpxwWZeLO7f5wAvDMPMwc84wFFNBGwcxTmYGXXxgsoxoBb3IchlRMydq/i/RWk6UjQtpYA+HOME5bnCPl5zoFQ+4wyVOcYQWljJRJ7c4NZ1MNI8N7OMKj3gv2NTFE67jsW5hYdBVq5jA+gDJNqYwOkyha/juE01LYDyK24s8Y0widbxFzRaVoILbSBIjmMVFnOYzOjo37HeyGW3u79pXdO7PHOMMu1iN7MR8ll/8AOwxZUp/RnwoAAAAAElFTkSuQmCC"),
+	"jet_swept" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAABIAAAAYCAYAAAD3Va0xAAAACXBIWXMAAAsTAAALEwEAmpwYAAABFElEQVR4nO3TvytGYRjG8c9M2MiAP8riXzD7CySUScqgWBQGRFEyMVAYWJRfkQUbCxOvo0f3cHo73rf3HDZXXfV0P8/5Ps+5u26aaypcSQN4xAP6qoAmkIXHqoCWc6ClKqCVHCit/0F/0KM2TOI2B7qNWtprqvbIzgU+cpAsXMMNZtH5E2C8ASCr82cRMCX2OjabAbIC4BVGE+g+nvyEc+xhETNxQRa+jNoctnEWc1gLxvfzhtBf97vd2MqBNtBTd6YXg5hu1Ph9POdALzhUQkcFPTkpAzr+LdBuAWinDGgEB3jFGzYxrKS6IgJ3sW5ZKelprk7xHllJs5Zy1NEKaLVB0tdbAaXDKeHzkfLkhaitFX3xBXL4hsyqzqwAAAAAAElFTkSuQmCC"),
+	"twin_large" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAABUAAAAUCAYAAABiS3YzAAAACXBIWXMAAAsTAAALEwEAmpwYAAABIUlEQVR4nLXUTStEURgH8J+XhYXIB7CwU+wsfAAbCxLK3ldgZ2cl2Vj4CCTR7JVCSWrYkBlvhVggio3yErr1qGlimq7rX7furXt+nfOc5xyqywDO0CvDbOAT61mBtTgItIi6LNA6nAZ6gYasZnqaFdqCadT8gE6gOQ06iQd0lKHteMJ4NUgj2tCNYezgHau4CvQGOXxgM1qtC63lZcnhOAbe4yWAap9n3OIcBSx/9+A29rAfS72MWVXCEug6DsVRjM1jt1I5RqJ2PTgsqekgHjGaZqOaMBvvhRI0yVza3S9NMdCkLJml+B9oPtDkDsgsa4Fu/RWqxxBmcBJo0j5T6Et7W/Xh9ZcefUN/GjQ58yuYxwLusBjfS+hMg5ZnrNo/vwBYSmsgb0yECwAAAABJRU5ErkJggg=="),
+	"twin_small" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAABMAAAAQCAYAAAD0xERiAAAACXBIWXMAAAsTAAALEwEAmpwYAAABAUlEQVR4nK3TvyuFYRjG8Y+BTP4EqwxGxT8hu1kpZfEvkCwmi0EGJQNiUBQ6KeoYpJTy+0eiDIpd9NY1vOnUOc5x1VvP1fPe36fnua+b+urHFQY0qVX0ZL2Mb6zE95bWdTWJTxzGHwS2F3+MD0w0AptJ8Vl8Nf4o/jx+qlZxN4Zz0ix28/MNKniJf8Y+7uK3MY1xDIXjPputfo8F7BS3eG8C8IVXXJSeRXu6N4J5bOaKldK1nvJ+VexgEaOJTlej3d371YCWtB5Y0ZiWtRTYWuso5gJb+A/YWGDFZGhWg9jAdWCXmdO+v4LaEoVa2XrIfsPqKOVpC28ZnyImJ+isVfUDi29pddt6O2sAAAAASUVORK5CYII="),
+	"ground_emergency" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAYAAAAPCAYAAADHw76AAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAu0lEQVR4nG3QsQrCMBAG4Lzm/WtLoN1c+gAO0jyHoKR0ah6gHTrZJxDcBEkRHRUK5eRCFZUEfkjuI8dxCoAG8ADAS+4AVgrA+qvIS7Yqz3NjreW+70OqquIsy6xK03TTti0LSrHrOk6SZCet9v+tiMgJ+AicP6C1jsMwDFyW5S/Udc1yZAhjzAeu3vsA0zTxOI4CFwF2zgWQ0zRNaBdAUhRFyPutiGiOjDvLj1tkV0eBk2yUiJ7LluV+eAGR1s/nC+hG+gAAAABJRU5ErkJggg=="),
+	"ground_service" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAYAAAAPCAYAAADHw76AAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAyElEQVR4nG2QsQqDQBBE/c3dRkEJetik0T5FIN8RSDjbfIAWVlHENpDuQAJBS68KE1ZEQ7AYWOaxs8s4zLxj5pGZMWtg5r3DzIcfE7POjlLqpLVGWZaTsixDFEXaCYLgmOc5BIpZFAV8379I1PU/iohuAl4bwEwgjuPFVEqtoG1beJ4H13XRNM0K6rpG13UwxqCqqgW8wzCEtRbjOEJmIuoETNnDMKDv++XWAtI0RZIkKyCiz8a7H9noN7p6CHhKo0Rk55Zlvn8BhjrM0tOjcM4AAAAASUVORK5CYII="),
+	"ground_unknown" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAYAAAAPCAYAAADHw76AAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAy0lEQVR4nG3QPwuCYBAGcL/mHTgpoW7OgqhD4OLoFwgKXZv9B059gyCnIIKoRSgc5IkT0wqHg/e9H3ccj8LMK2Z+MjPGejCzrTBz8NXEWBvFsqwwSRLUdT1UmqYwTTNRdF1fF0UBQWmWZQlN07ayave/ioj2AtcFOA+gqiqCIIBt279QVRWapkHXdfB9f4YwDBHHMdq2heM4E9xkPMsyRFH0WXURGD55nsN13emACTzPg2EYMxBRv3BuLxP3hayOAidJlIheY8ryPrwB2dzIxLnGp28AAAAASUVORK5CYII="),
+	"ground_fixed" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA8klEQVR4nI1S26mFQAy0TgvQDxW0At+t6Pr4EBvRBtRfURtQ0LlMQEEu53ACgd1kJjtJVtN1HYZhwHXdr26aJojVeAjDEMuygHYcB6ZpEueZtq4rgiAQkuZ5HrZtE1LbtkjTFGVZiidJIjHf9zHPM4gVAo0JpRSu68Jt53kiz3M0TSP3h7Dvu1QmuOs6WJYF27bR972Q4jgWzEMYhgF1XUsVgtkc3XEciRVFIZiHMI4jqqr6SFBKvQl8jg1SEmVQDsG3pCiK3pK+NZ1l2f+m7zkzwQY5UupmZcZeY+UyGLgXx6epl84zjblncb9+DWL4Nf4AJIqp8jsr1J8AAAAASUVORK5CYII="),
+	"unknown" : base64.decode("iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAACXBIWXMAAAsTAAALEwEAmpwYAAAA4ElEQVR4nMXTMUpDQRSF4a+wjJ2FpZWgjY1bEGwCqVyDvRvIFiytBHEDNtYqgYSAIKaLgYgKFkLEzsonF0YYJL6XxxNy4VSX88/cc2corw5GONCgeihw3QQyTpCHJpBJgkyXCtnDS4K8Yr+OeQsXmCXAjz5wg90y8xpOs9P/UtzqEhu5uYXjbP5iQT3hBKsB6eOrJqBICt8wIGe4w/0czbI85vXDd14V8iRBHuts5t8hOym8gDxjc1HjCroY4P1XiG+4wlEV5BCfFRuJfrsMsp0Sj1+bKzKJRxjj3WI9d30DvtluWNUSJG8AAAAASUVORK5CYII="),
+}
+TYPE_DESIGNATOR_ICONS = {
+        'A10':  'hi_perf',
+        'A148': 'hi_perf',
+        'A225': 'heavy_4e',
+        'A3':   'hi_perf',
+        'A37':  'jet_nonswept',
+        'A5':   'cessna',
+        'A6':   'hi_perf',
+        'A700': 'jet_nonswept',
+        'AC80': 'twin_small',
+        'AC90': 'twin_small',
+        'AC95': 'twin_small',
+        'AJ27': 'jet_nonswept',
+        'AJET': 'hi_perf',
+        'AN28': 'twin_small',
+        'ARCE': 'hi_perf',
+        'AT3':  'hi_perf',
+        'ATG1': 'jet_nonswept',
+        'B18T': 'twin_small',
+        'B190': 'twin_small',
+        'B25':  'twin_large',
+        'B350': 'twin_small',
+        'B52':  'heavy_4e',
+        'B712': 'jet_swept',
+        'B721': 'airliner',
+        'B722': 'airliner',
+        'BALL': 'balloon',
+        'BE10': 'twin_small',
+        'BE20': 'twin_small',
+        'BE30': 'twin_small',
+        'BE32': 'twin_small',
+        'BE40': 'jet_nonswept',
+        'BE99': 'twin_small',
+        'BE9L': 'twin_small',
+        'BE9T': 'twin_small',
+        'BN2T': 'twin_small',
+        'BPOD': 'jet_swept',
+        'BU20': 'twin_small',
+        'C08T': 'jet_swept',
+        'C125': 'twin_small',
+        'C212': 'twin_small',
+        'C21T': 'twin_small',
+        'C22J': 'jet_nonswept',
+        'C25A': 'jet_nonswept',
+        'C25B': 'jet_nonswept',
+        'C25C': 'jet_nonswept',
+        'C25M': 'jet_nonswept',
+        'C425': 'twin_small',
+        'C441': 'twin_small',
+        'C46':  'twin_large',
+        'C500': 'jet_nonswept',
+        'C501': 'jet_nonswept',
+        'C510': 'jet_nonswept',
+        'C525': 'jet_nonswept',
+        'C526': 'jet_nonswept',
+        'C550': 'jet_nonswept',
+        'C551': 'jet_nonswept',
+        'C55B': 'jet_nonswept',
+        'C560': 'jet_nonswept',
+        'C56X': 'jet_nonswept',
+        'C650': 'jet_swept',
+        'C680': 'jet_nonswept',
+        'C68A': 'jet_nonswept',
+        'C750': 'jet_swept',
+        'C82':  'twin_large',
+        'CKUO': 'hi_perf',
+        'CL30': 'jet_swept',
+        'CL35': 'jet_swept',
+        'CL60': 'jet_swept',
+        'CRJ1': 'jet_swept',
+        'CRJ2': 'jet_swept',
+        'CRJ7': 'jet_swept',
+        'CRJ9': 'jet_swept',
+        'CRJX': 'jet_swept',
+        'CVLP': 'twin_large',
+        'D228': 'twin_small',
+        'DA36': 'hi_perf',
+        'DA50': 'airliner',
+        'DC10': 'heavy_2e',
+        'DC3':  'twin_large',
+        'DC3S': 'twin_large',
+        'DHA3': 'twin_small',
+        'DHC4': 'twin_large',
+        'DHC6': 'twin_small',
+        'DLH2': 'hi_perf',
+        'E110': 'twin_small',
+        'E135': 'jet_swept',
+        'E145': 'jet_swept',
+        'E29E': 'hi_perf',
+        'E45X': 'jet_swept',
+        'E500': 'jet_nonswept',
+        'E50P': 'jet_nonswept',
+        'E545': 'jet_swept',
+        'E55P': 'jet_nonswept',
+        'EA50': 'jet_nonswept',
+        'EFAN': 'jet_nonswept',
+        'EFUS': 'hi_perf',
+        'ELIT': 'jet_nonswept',
+        'EUFI': 'hi_perf',
+        'F1':   'hi_perf',
+        'F100': 'jet_swept',
+        'F111': 'hi_perf',
+        'F117': 'hi_perf',
+        'F14':  'hi_perf',
+        'F15':  'hi_perf',
+        'F22':  'hi_perf',
+        'F2TH': 'jet_swept',
+        'F4':   'hi_perf',
+        'F406': 'twin_small',
+        'F5':   'hi_perf',
+        'F900': 'jet_swept',
+        'FA50': 'jet_swept',
+        'FA5X': 'jet_swept',
+        'FA7X': 'jet_swept',
+        'FA8X': 'jet_swept',
+        'FJ10': 'jet_nonswept',
+        'FOUG': 'jet_nonswept',
+        'FURY': 'hi_perf',
+        'G150': 'jet_swept',  
+        'G3':   'airliner',
+        'GENI': 'hi_perf',
+        'GL5T': 'jet_swept',
+        'GLEX': 'jet_swept',  
+        'GLF2': 'jet_swept',
+        'GLF3': 'jet_swept',
+        'GLF4': 'jet_swept',
+        'GLF5': 'jet_swept',
+        'GLF6': 'jet_swept',
+        'GSPN': 'jet_nonswept',
+        'H25A': 'jet_swept',
+        'H25B': 'jet_swept',
+        'H25C': 'jet_swept',
+        'HA4T': 'airliner',
+        'HDJT': 'jet_nonswept',
+        'HERN': 'jet_swept',
+        'J8A':  'hi_perf',
+        'J8B':  'hi_perf',
+        'JH7':  'hi_perf',
+        'JS31': 'twin_small',
+        'JS32': 'twin_small',
+        'JU52': 'twin_small',
+        'L101': 'heavy_2e',
+        'LAE1': 'hi_perf',
+        'LEOP': 'jet_nonswept',
+        'LJ23': 'jet_nonswept',
+        'LJ24': 'jet_nonswept',
+        'LJ25': 'jet_nonswept',
+        'LJ28': 'jet_nonswept',
+        'LJ31': 'jet_nonswept',
+        'LJ35': 'jet_nonswept',
+        'LJ40': 'jet_nonswept',
+        'LJ45': 'jet_nonswept',
+        'LJ55': 'jet_nonswept',
+        'LJ60': 'jet_nonswept',
+        'LJ70': 'jet_nonswept',
+        'LJ75': 'jet_nonswept',
+        'LJ85': 'jet_nonswept',
+        'LTNG': 'hi_perf',
+        'M28':  'twin_small',
+        'MD11': 'heavy_2e',
+        'MD81': 'jet_swept',
+        'MD82': 'jet_swept',
+        'MD83': 'jet_swept',
+        'MD87': 'jet_swept',
+        'MD88': 'jet_swept',
+        'MD90': 'jet_swept',
+        'ME62': 'jet_nonswept',
+        'METR': 'hi_perf',
+        'MG19': 'hi_perf',
+        'MG25': 'hi_perf',
+        'MG29': 'hi_perf',
+        'MG31': 'hi_perf',
+        'MG44': 'hi_perf',
+        'MH02': 'jet_nonswept',
+        'MS76': 'jet_nonswept',
+        'MT2':  'hi_perf',
+        'MU2':  'twin_small',
+        'P180': 'twin_small',
+        'P2':   'twin_large',
+        'P68T': 'twin_small',
+        'PA47': 'jet_nonswept',
+        'PAT4': 'twin_small',
+        'PAY1': 'twin_small',
+        'PAY2': 'twin_small',
+        'PAY3': 'twin_small',
+        'PAY4': 'twin_small',
+        'PIAE': 'hi_perf',
+        'PIT4': 'hi_perf',
+        'PITE': 'hi_perf',
+        'PRM1': 'jet_nonswept',
+        'PRTS': 'jet_nonswept',
+        'Q5':   'hi_perf',
+        'R721': 'airliner',
+        'R722': 'airliner',
+        'RFAL': 'hi_perf',
+        'ROAR': 'hi_perf',
+        'S3':   'hi_perf',
+        'S32E': 'hi_perf',
+        'S37':  'hi_perf',
+        'S601': 'jet_nonswept',
+        'SATA': 'jet_nonswept',
+        'SB05': 'jet_nonswept',
+        'SC7':  'twin_small',
+        'SF50': 'jet_nonswept',
+        'SJ30': 'jet_nonswept',
+        'SLCH': 'heavy_4e',
+        'SM60': 'twin_small',
+        'SOL1': 'jet_swept',
+        'SOL2': 'jet_swept',
+        'SP33': 'jet_nonswept',
+        'SR71': 'hi_perf',
+        'SS2':  'hi_perf',
+        'SU15': 'hi_perf',
+        'SU24': 'hi_perf',
+        'SU25': 'hi_perf',
+        'SU27': 'hi_perf',
+        'SW2':  'twin_small',
+        'SW3':  'twin_small',
+        'SW4':  'twin_small',
+        'T154': 'airliner',
+        'T2':   'jet_nonswept',
+        'T22M': 'hi_perf',
+        'T37':  'jet_nonswept',
+        'T38':  'jet_nonswept',
+        'T4':   'hi_perf',
+        'TJET': 'jet_nonswept',
+        'TOR':  'hi_perf',
+        'TRIM': 'twin_small',
+        'TRIS': 'twin_small',
+        'TRMA': 'twin_small',
+        'TU22': 'hi_perf',
+        'VAUT': 'hi_perf',
+        'Y130': 'hi_perf',
+        'Y141': 'airliner',
+        'YK28': 'hi_perf',
+        'YK38': 'airliner',
+        'YK40': 'airliner',
+        'YK42': 'airliner',
+        'YURO': 'hi_perf'
+}
+TYPE_DESCRIPTION_ICON = {
+        'H': 'helicopter',
+
+        'L1P': 'cessna',
+        'L1T': 'cessna',
+        'L1J': 'hi_perf',
+
+        'L2P': 'twin_small',
+        'L2T': 'twin_large',
+
+        'L2J-L': 'jet_swept',
+        'L2J-M': 'airliner',
+        'L2J-H': 'heavy_2e',
+
+        'L4T': 'heavy_4e',
+        'L4J-H': 'heavy_4e'
+}
+CATEGORY_ICONS = {
+        "A1" : 'cessna',
+        "A2" : 'jet_nonswept',
+        "A3" : 'airliner',
+        "A4" : 'heavy_2e',
+        "A5" : 'heavy_4e',
+        "A6" : 'hi_perf',
+        "A7" : 'helicopter',
+        "B1" : 'cessna',
+        "B2" : 'balloon',
+        "B4" : 'cessna',
+        "B7" : 'hi_perf',
+        'C0' : 'ground_unknown',
+        'C1' : 'ground_emergency',
+        'C2' : 'ground_service',
+        'C3' : 'ground_fixed',
+        "C4" : 'ground_fixed',
+        "C5" : 'ground_fixed',
+        "C6" : 'ground_unknown',
+        "C7" : 'ground_unknown'
+}
+
 # (degrees–>radians)
 def deg_to_rad(num):
     return num * (math.pi / 180)
@@ -75,9 +374,6 @@ def get_bounding_box(centrePoint, distance):
     MAX_LAT = deg_to_rad(90)
     MIN_LON = deg_to_rad(-180)
     MAX_LON = deg_to_rad(180)
-
-    # earth's radius (km)
-    R = 6378.1
 
     # angular distance in radians on a great circle
     radDist = distance / R
@@ -121,18 +417,48 @@ def get_bounding_box(centrePoint, distance):
         str(rad_to_deg(maxLon)),
     ]
 
-def is_key_present(k):
+def create_bounding_box(latitude, longitude, radius_km):
+    # Compute the bounding box of a circle with a given latitude, longitude, and radius in kilometers
+    # https://stackoverflow.com/questions/1253499/simple-calculations-for-working-with-lat-lon-km-distance
+    #lat_rad, lon_rad = coordinates_to_radians(latitude, longitude)
+    lat_rad = deg_to_rad(latitude)
+    lon_rad = deg_to_rad(longitude)
+    radius_rad = radius_km / R
+
+    lat_min = lat_rad - radius_rad
+    lat_max = lat_rad + radius_rad
+
+    if lat_min > math.radians(-90) and lat_max < math.radians(90):
+        delta_lon = math.asin(math.sin(radius_rad) / math.cos(lat_rad))
+        lon_min = lon_rad - delta_lon
+        if lon_min < math.radians(-180):
+            lon_min += 2 * math.pi
+        lon_max = lon_rad + delta_lon
+        if lon_max > math.radians(180):
+            lon_max -= 2 * math.pi
+    else:
+        lat_min = max(lat_min, math.radians(-90))
+        lat_max = min(lat_max, math.radians(90))
+        lon_min = math.radians(-180)
+        lon_max = math.radians(180)
+
+    return [
+        str(rad_to_deg(lat_min)),
+        str(rad_to_deg(lat_max)),
+        str(rad_to_deg(lon_min)),
+        str(rad_to_deg(lon_max)),
+    ]
+
+
+def get_airline_tail(k):
     if k in TAILS:
         return TAILS[k]
     else:
         return TAILS["Q4"]
 
 def reduce_accuracy(coord):
-    coord_list = coord.split(".")
-    coord_remainder = coord_list[1]
-    if len(coord_remainder) > 3:
-        coord_remainder = coord_remainder[0:3]
-    return ".".join([coord_list[0], coord_remainder])
+    # reduce accuracy by multiplying by 1000 and rounding, returning a float
+    return int(coord * 1000) / 1000.0
 
 def update_display(tail, text):
     return render.Row(
@@ -149,35 +475,33 @@ def update_display(tail, text):
         ],
     )
 
-def main(config):
-    api_key = config.get("key")
 
-    if (api_key == "") or (api_key == None):
-        tail = TAILS["Q4"]
-        text = [
-            render.Text("Add"),
-            render.Text("API"),
-            render.Text("Key"),
-        ]
-        return render.Root(
-            child = update_display(tail, text),
-        )
+def compute_distance_km(latitude1, longitude1, latitude2, longitude2):
+    # Convert latitude and longitude to radians
+    lat1_rad = deg_to_rad(latitude1)
+    lon1_rad = deg_to_rad(longitude1)
+    lat2_rad = deg_to_rad(latitude2)
+    lon2_rad = deg_to_rad(longitude2)
 
-    location = json.decode(config.get("location", DEFAULT_LOCATION))
+    # Compute the distance in kilometers
+    dlon = lon2_rad - lon1_rad
+    dlat = lat2_rad - lat1_rad
+    a = math.pow(math.sin(dlat / 2), 2) + math.cos(lat1_rad) * math.cos(lat2_rad) * math.pow(math.sin(dlon / 2), 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance_km = R * c
+    return distance_km
 
-    lat = reduce_accuracy(location["lat"])
-    lng = reduce_accuracy(location["lng"])
-
-    cache_key = "_".join([lat, lng])
-
+def get_nearest_flightradar(lat, lng, distance, api_key):
+    cache_key = "_".join(["flightradar", lat, lng])
     flight_cached = cache.get(cache_key)
     if flight_cached != None:
         print("Hit! Displaying cached data.")
-        flight = json.decode(flight_cached)
+        flight = flight_cached
     else:
         print("Miss! Contacting Flight Radar")
-        centrePoint = [float(lat), float(lng)]
-        boundingBox = get_bounding_box(centrePoint, config.get("distance", DEFAULT_DISTANCE))
+        # centrePoint = [float(lat), float(lng)]
+        # boundingBox = get_bounding_box(centrePoint, distance)
+        boundingBox = create_bounding_box(lat, lng, distance)
         rep = http.get(
             FLIGHT_RADAR_URL,
             params = {"bl_lat": boundingBox[0], "bl_lng": boundingBox[1], "tr_lat": boundingBox[2], "tr_lng": boundingBox[3]},
@@ -196,21 +520,133 @@ def main(config):
         else:
             flight = []
 
-        cache.set(cache_key, json.encode(flight), ttl_seconds = DEFAULT_CACHE)
-
     if flight:
-        origin = flight[12]
-        destination = flight[13]
-        flightNumber = flight[14]
-        aircraftType = flight[9]
-        airline = flightNumber[0:2]
-        tail = is_key_present(airline)
-        text = [
-            render.Text("%s" % origin),
-            render.Text("%s" % destination),
-            render.Text("%s" % flightNumber),
-            render.Text("%s" % aircraftType),
-        ]
+        airline = flight[14][0:2]
+        flight_struct = struct(
+            origin = flight[12],
+            destination = flight[13],
+            flightNumber = flight[14],
+            aircraftType = flight[9],
+            airline = airline,
+        )
+        cache.set(cache_key, flight_struct, ttl_seconds = DEFAULT_CACHE)
+    else:
+        flight_struct = struct(
+            origin = None,
+            destination = None,
+            flightNumber = None,
+            aircraftType = None,
+            airline = None,
+            airlineTail = None,
+        )
+    return flight_struct
+
+
+
+def get_nearest_opensky(lat, lng, distance, username, password):
+    cache_key = "_".join(["opensky", str(lat), str(lng)])
+    flight_cached = cache.get(cache_key)
+    if flight_cached != None:
+        print("Hit! Displaying cached data.")
+        return flight_cached
+
+    print("Miss! Contacting OpenSky")
+    url = "https://opensky-network.org/api/states/all"
+    # centrePoint = [float(lat), float(lng)]
+    # lamin, lamax, lomin, lomax = get_bounding_box(centrePoint, distance)
+    lamin, lamax, lomin, lomax = create_bounding_box(lat, lng, distance)
+
+    rep = http.get(
+        url,
+        params = {"lamin": lamin, "lamax": lamax, "lomin": lomin, "lomax": lomax},
+        headers = {
+            "Authorization": "Basic " + base64.encode("{}:{}".format(username, password)),
+        }
+    )
+    print(rep)
+    if rep.status_code != 200:
+        fail("Failed to fetch flights with status code:", rep.status_code)
+    data = rep.json()
+
+    min_distance = float("inf")
+    nearest_airplane = None
+
+    for airplane in data["states"]:
+        if airplane[5] and airplane[6]:
+            distance = compute_distance_km(float(lat), float(lng), airplane[6], airplane[5])
+            if distance < min_distance:
+                min_distance = distance
+                nearest_airplane = airplane
+    
+    nearest_flight = struct(
+            origin=None,
+            destination=None,
+            flightNumber=nearest_airplane[1],
+            aircraftType=None,
+            airline=nearest_airplane[1][:2] if nearest_airplane[1] else None,
+            icao24=nearest_airplane[0],
+            callsign=nearest_airplane[1],
+            origin_country=nearest_airplane[2],
+            time_position=nearest_airplane[3],
+            longitude=nearest_airplane[5],
+            latitude=nearest_airplane[6],
+            altitude=nearest_airplane[7],
+            on_ground=nearest_airplane[8],
+            velocity=nearest_airplane[9],
+            true_track=nearest_airplane[10]
+        )
+    return nearest_flight
+
+
+def main(config):
+    location = json.decode(config.get("location", DEFAULT_LOCATION))
+    lat_full_accuracy = float(location["lat"])
+    lng_full_accuracy = float(location["lng"])
+    lat = reduce_accuracy(lat_full_accuracy)
+    lng = reduce_accuracy(lng_full_accuracy)
+    distance = float(config.get("distance", DEFAULT_DISTANCE))
+
+
+    provider = config.get("provider")
+    if provider == "flightradar":
+        print("Using Flight Radar")
+        flightradar_key = config.get("flightradar_key")
+        if (flightradar_key == "") or (flightradar_key == None):
+            flightradar_key = secret.decrypt("AV6+xWcEFKIfCw67zTcYusGXoTGKrc1bOSIdg8X8UuTkEYMbEdcN67Lh1R8PxQUqFf3QxoXI39bIZz0LV8LgL11JY+/uSxEYPlrVMMEqzJMUJngnn9ZW31mmc5Hk9iNnwgfKAZ6YOadc86TTyR3Pyg78hbUfrE2brp3zYWRpsLrfJpxtIlX4UVlHtuC4qF87pQjyeLQ1wHw=")
+        nearest = get_nearest_flightradar(lat, lng, distance, flightradar_key)
+    elif provider == "opensky":
+        print("Using OpenSky")
+        nearest = get_nearest_opensky(lat, lng, distance, config.get("username"), config.get("password"))
+    else:
+        nearest = None
+    # elif provider == "adsbexchange":
+    #     print("Using ADSB Exchange")
+    #     nearest = get_nearest_adsbexchange(lat, lng, distance, config.get("adsbexchange_username"), config.get("adsbexchange_password"))
+
+
+    if nearest:
+        print(nearest)
+        airlineTail = get_airline_tail(nearest.airline)
+        distance = compute_distance_km(lat_full_accuracy, lng_full_accuracy, nearest.latitude, nearest.longitude)
+
+        display = render.Row(
+            children = [
+                render.Box(
+                    width = 32,
+                    child = render.Image(airlineTail),
+                ),
+                render.Box(
+                    child = render.Column(
+                        children = [
+                            render.Text("%s" % nearest.origin),
+                            render.Text("%s" % nearest.destination),
+                            render.Text("%s" % nearest.flightNumber),
+                            render.Text("%s" % nearest.aircraftType),
+                        ],
+                    ),
+                ),
+            ],
+        )
     else:
         tail = TAILS["Q4"]
         text = [
@@ -223,8 +659,86 @@ def main(config):
         child = update_display(tail, text),
     )
 
+
+def get_provider_specific(provider):
+    if provider == "flightradar":
+        return [
+            schema.Text(
+                id = "flightradar_key",
+                name = "Flight Radar API key",
+                desc = "Flight Radar API key",
+                icon = "key",
+            ),
+        ]
+    elif provider == "flightaware":
+        return [
+            schema.Text(
+                id = "flightaware_username",
+                name = "FlightAware username",
+                desc = "FlightAware username",
+                icon = "user",
+            ),
+            schema.Text(
+                id = "flightaware_password",
+                name = "FlightAware password",
+                desc = "FlightAware password",
+                icon = "key",
+            ),
+        ]
+    elif provider == "opensky":
+        return [
+            schema.Text(
+                id = "opensky_username",
+                name = "OpenSky username",
+                desc = "OpenSky username",
+                icon = "key",
+            ),
+            schema.Text(
+                id = "opensky_password",
+                name = "OpenSky password",
+                desc = "OpenSky password",
+                icon = "key",
+            ),
+        ]
+    elif provider == "adsbexchange":
+        return [
+            schema.Text(
+                id = "adsbexchange_username",
+                name = "ADS-B Exchange username",
+                desc = "ADS-B Exchange username",
+                icon = "key",
+            ),
+            schema.Text(
+                id = "adsbexchange_password",
+                name = "ADS-B Exchange password",
+                desc = "ADS-B Exchange password",
+                icon = "key",
+            ),
+        ]
+    else:
+        return []
+
 def get_schema():
-    options = [
+    provider_options = [
+        schema.Option(
+            display = "Flight Radar",
+            value = "flightradar",
+        ),
+        schema.Option(
+            display = "FlightAware",
+            value = "flightaware",
+        ),
+        schema.Option(
+            display = "OpenSky",
+            value = "opensky",
+        ),
+        schema.Option(
+            display = "ADS-B Exchange",
+            value = "adsbexchange",
+        ),
+    ]
+
+    distance_options = [
         schema.Option(
             display = "1km",
             value = "1",
@@ -236,6 +750,14 @@ def get_schema():
         schema.Option(
             display = "10km",
             value = "10",
+        ),
+        schema.Option(
+            display = "25km",
+            value = "25",
+        ),
+        schema.Option(
+            display = "100km",
+            value = "100",
         ),
     ]
 
@@ -249,17 +771,42 @@ def get_schema():
                 icon = "locationDot",
             ),
             schema.Dropdown(
+                id = "provider",
+                name = "Provider",
+                desc = "Which provider should we use?.",
+                icon = "server",
+                default = provider_options[0].value,
+                options = provider_options,
+            ),
+            schema.Dropdown(
                 id = "distance",
                 name = "Distance",
                 desc = "Search distance from your location.",
                 icon = "rulerHorizontal",
-                default = options[1].value,
-                options = options,
+                default = distance_options[1].value,
+                options = distance_options,
+            ),
+            # schema.Generated(
+            # id = "generated",
+            # source = "provider",
+            # handler = get_provider_specific,
+            # ),
+            schema.Text(
+                id = "username",
+                name = "Username",
+                desc = "Username (if necessary for whatever provider you selected)",
+                icon = "user",
             ),
             schema.Text(
-                id = "key",
-                name = "API key",
-                desc = "Flight Radar API key",
+                id = "password",
+                name = "Password",
+                desc = "Password (if necessary for whatever provider you selected)",
+                icon = "key",
+            ),
+            schema.Text(
+                id = "api_key",
+                name = "API Key",
+                desc = "API Key (if necessary for whatever provider you selected)",
                 icon = "key",
             ),
         ],
