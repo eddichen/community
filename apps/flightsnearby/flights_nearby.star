@@ -21,11 +21,11 @@ DEFAULT_LOCATION = json.encode({
     "place_id": "",
     "timezone": "",
 })
-DEFAULT_DISTANCE = "25"
-DEFAULT_CACHE = 180 #seconds
+DEFAULT_DISTANCE = "10"
+DEFAULT_CACHE = 180
 # earth's radius (km)
 R = 6378.1
-FLIGHT_RADAR_URL = "https://flight-radar1.p.rapidapi.com/flights/list-in-boundary"
+
 TAILS = {
     "AA": base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAMAAAAM7l6QAAACTFBMVEUAAAC5IBizHxi7yc3Qcm+3HBcLZrDV7fHYubaoKiu1AgD78Oa7HBIAZrW+BAC6UUwVYaPVBwDANzHZ//+9DQNtm73EHhMhdLPBOzUHc7nH3+O4KCADWqUmS4b////QHAzezMsAXqponMU7fLO+hIHFKyITY6azBgC0HBTBHRTAKyNqfqEFUJa2KyfTSUBIg7bJl5nEYVvKvr4AVJ+tqr3CHBBUeqYNa7B3pM3FIBW8vcXp3tNejLXB3eSuo62okZ0LX6TCIBfLeHa5AADe9vnI5Oj46uL///+9AADH5enDWlLaBADK8vnJ8PYAUqnqa2LaOzHX/v59rtPhzM10ocVcksFGjr8terYteLQAVq0ARZi/Fw3DDgK4BQDG5utxostfm8t+pMpglsbKwcNqmcIjgsIAX8I9fbfit7UHarEAWq0zcqoASZ0API6+jIoAPojHHxL6///X+v/o//zH8fdkt+xvxOtxvOnE4eb16+R1uOHe3duDtNhQmdOfv9FeoNEAetFzps5Xms7w0c3hy8t3ochnocg1jshFjMdgnsZynMYegsZ6oMFjlb1BibzqvLrXvLpqlbgAXbXgvLQPZ7PotbIldrL4t61dhq0FY6wmbqoRY6dJd6ZDdaY5caUVYqIoZqFZd50sYZuYgZgqW5ZQa5UdVJLEjYnSi4QAOITMhIFUVXznbWTua2H/XkfkUT1lHDmNKzbZNy70PyzeNiviNiV2DyXCKR++Fgu4FAu3FAuXAwnmFQLVDQDICwC8BwD6AADmAADOAADBAAD3XlVqAAAAQnRSTlMA85F1PjgwFQgE+fj19PLw7enh3tvY0svFwL+5tLOvq6WjoZ6ampmZlJKNhH5+eHRxa2BbWFdWRDgvKB8fHBUSERAsRGa4AAABXUlEQVQoz2IYAGCuJiMrr6plil1WcWZmw8a9u3ZqYpXVXjSve/WeggIxR2yyZp0Te9smT0hONsImyxbpl5VWVhgYWMSORdZmxtw56UtXLM/LU8GmWSA7Ozx1+6HY2P2sWGTFM2fPz9pwMCZmnwgWWaWQkJCUnulTMzL6DTBldXLz81fm1hWX+Pr62mLImqSHhoZ2pDQHBwe3KGB6KSgxKKi8amtMdHT0Dkt0WcAceP0iIyelbTvgDQSCGJpF+8LCwtoXrvcCAUN0WcnUabMWLFtSHegDBL7oIaYcHhERHjGlxh0M5NBk9RO74uMbS1s3bwoAgi0sqLLGUVFROTl+fru9PYDgMB8niqxFU31CQlJS7eJ1a/yBYK0eiqw1txsEVLpAAAeyLIdwhSsEeMZ5AkGcFLIsp8QqJ1SA7DArIQ9nFODBhZC0Z+aPZUQFPLoIaTtmaXUmVKDBykAdAACNkHIoMAgDegAAAABJRU5ErkJggg=="""),
     "AY": base64.decode("""iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAMAAAAM7l6QAAAA/1BMVEUAAAD////////////////////////////////8/P3////////////////////////////////////////////7+/z////////////////////////////29vl5ga/////////8/P0OG2////8ACWX///////////////9qcqb///8AB2MpMn0PG28BC2QAAFsAAFL19fdNUpE2QIcSInTm6PDh4+2BhbF0eqppcqZiY5stOoM0O38nLXkNF2wCEWkKDWMAAV8AAE7q6/LT1eXDxtyXmr58gK5eZ59ZX5lISoo9Roo8Q4cfKXchKXYVHm0FCF8AAE0AAEEAAD4AADwcvL0xAAAAKnRSTlMA9JGas3YVEAf928+6o5R/X1c+Oicb8Oni18S+q6SXjYVxbGtTRDYwLy83HWtDAAAA80lEQVQoz8XR147CMBBAUbxJCG0pC2zvfSfGqfTOdnr7/28hEkmQnXlE4r4ejWTPRA7QiyTL19JdDtdj2JZG9d7TpIppFryymObBL4poIVAJ0RgJOI9wMtAE+iW/z4ewZsoWbVNKm835bzGkuXLP0NxYf0VvQvoWb+vdkltn1oB3UVViGawGbhUTzkLDF7WF0/mr1/8tE+BJ1NSP4XSZMViuq8jGbqt6iU3Gdmv47aos6GNfd/SpCV4nvD5rTBv0Kr4SXj9atj1qfIGfwmmRAF+Mu1JC0Ctu+JIz4WGFc1HjO1SVUyBCmR1HlZR0xJd+jeynDaSfM5/gDT8BAAAAAElFTkSuQmCC"""),
@@ -2967,30 +2967,6 @@ CATEGORY_ICONS = {
         "C7" : 'ground_unknown'
 }
 
-OPENSKY_CAT = {
-    0: 'A0',
-    1: 'A0',
-    2: 'A1',
-    3: 'A2',
-    4: 'A3',
-    5: 'A4',
-    6: 'A5',
-    7: 'A6',
-    8: 'A7',
-    9: 'B1',
-    10: 'B2',
-    11: 'B3',
-    12: 'B4',
-    13: 'B5',
-    14: 'B6',
-    15: 'B7',
-    16: 'C1',
-    17: 'C2',
-    18: 'C3',
-    19: 'C4',
-    20: 'C5'
-}
-
 # (degrees–>radians)
 def deg_to_rad(num):
     return num * (math.pi / 180)
@@ -2999,63 +2975,7 @@ def deg_to_rad(num):
 def rad_to_deg(num):
     return (180 * num) / math.pi
 
-def get_bounding_box(centrePoint, distance):
-    distance = int(distance)
-    if distance < 0:
-        fail("Distance must be greater than 0")
-
-    # coordinate limits
-    MIN_LAT = deg_to_rad(-90)
-    MAX_LAT = deg_to_rad(90)
-    MIN_LON = deg_to_rad(-180)
-    MAX_LON = deg_to_rad(180)
-
-    # angular distance in radians on a great circle
-    radDist = distance / R
-
-    # centre point coordinates (deg)
-    degLat = centrePoint[0]
-    degLon = centrePoint[1]
-
-    # centre point coordinates (rad)
-    radLat = deg_to_rad(degLat)
-    radLon = deg_to_rad(degLon)
-
-    # minimum and maximum latitudes for given distance
-    minLat = radLat - radDist
-    maxLat = radLat + radDist
-
-    # minimum and maximum longitudes for given distance
-    minLon = 0
-    maxLon = 0
-
-    # define deltaLon to help determine min and max longitudes
-    deltaLon = math.asin(math.sin(radDist) / math.cos(radLat))
-    if (minLat > MIN_LAT) and (maxLat < MAX_LAT):
-        minLon = radLon - deltaLon
-        maxLon = radLon + deltaLon
-        if minLon < MIN_LON:
-            minLon = minLon + 2 * math.pi
-        if maxLon > MAX_LON:
-            maxLon = maxLon - 2 * math.pi
-
-        # a pole is within the given distance
-    else:
-        minLat = math.max(minLat, MIN_LAT)
-        maxLat = math.min(maxLat, MAX_LAT)
-        minLon = MIN_LON
-        maxLon = MAX_LON
-    return [
-        str(rad_to_deg(minLat)),
-        str(rad_to_deg(minLon)),
-        str(rad_to_deg(maxLat)),
-        str(rad_to_deg(maxLon)),
-    ]
-
 def create_bounding_box(latitude, longitude, radius_km):
-    # Compute the bounding box of a circle with a given latitude, longitude, and radius in kilometers
-    # https://stackoverflow.com/questions/1253499/simple-calculations-for-working-with-lat-lon-km-distance
-    #lat_rad, lon_rad = coordinates_to_radians(latitude, longitude)
     latitude = reduce_accuracy(latitude)
     longitude = reduce_accuracy(longitude)
 
@@ -3176,6 +3096,7 @@ def compute_distance_km(latitude1, longitude1, latitude2, longitude2):
     return distance_km
 
 def get_nearest_flightradar(lat, lng, distance, api_key):
+    FLIGHT_RADAR_URL = "https://flight-radar1.p.rapidapi.com/flights/list-in-boundary"
     boundingBox = create_bounding_box(lat, lng, distance)
     rep = http.get(
         FLIGHT_RADAR_URL,
@@ -3185,7 +3106,6 @@ def get_nearest_flightradar(lat, lng, distance, api_key):
     if rep.status_code != 200:
         print("Failed to fetch flights with status code:", rep.status_code)
         return None
-    print(rep)
 
     min_distance = float("inf")
     nearest_airplane = None
@@ -3197,26 +3117,6 @@ def get_nearest_flightradar(lat, lng, distance, api_key):
                 min_distance = distance
                 nearest_airplane = flight
 
-#example response
-# 0:"2faa8076"
-# 1:"AD574C" #icao
-# 2:39.3333 #latitude
-# 3:-73.7635 # longitude
-# 4:214 #track
-# 5:36000 #altitude
-# 6:364
-# 7:""
-# 8:"F-KNEL1" #tail
-# 9:"A20N" #aircraft type
-# 10:"N959NK" #registration
-# 11:1679869934
-# 12:"BDL" #origin
-# 13:"MYR" #destination
-# 14:"NK291" #flight number (and airline code at the beginning)
-# 15:0
-# 16:0
-# 17:"NKS291" # call sign
-# 18:0
     if nearest_airplane:
         flight_dict = dict(
                 origin=nearest_airplane[12],
@@ -3254,7 +3154,6 @@ def get_nearest_opensky(lat, lng, distance, username, password):
             "Authorization": "Basic " + base64.encode("{}:{}".format(username, password)),
         }
     )
-    print(rep)
     if rep.status_code != 200:
         print("Failed to fetch flights with status code:", rep.status_code)
         return None
@@ -3272,8 +3171,29 @@ def get_nearest_opensky(lat, lng, distance, username, password):
                 min_distance = distance
                 nearest_airplane = airplane
     
-
-    print(nearest_airplane)
+    category_map = {
+        0: 'A0',
+        1: 'A0',
+        2: 'A1',
+        3: 'A2',
+        4: 'A3',
+        5: 'A4',
+        6: 'A5',
+        7: 'A6',
+        8: 'A7',
+        9: 'B1',
+        10: 'B2',
+        11: 'B3',
+        12: 'B4',
+        13: 'B5',
+        14: 'B6',
+        15: 'B7',
+        16: 'C1',
+        17: 'C2',
+        18: 'C3',
+        19: 'C4',
+        20: 'C5'
+    }
     nearest_flight = dict(
             origin=None,
             destination=None,
@@ -3290,7 +3210,7 @@ def get_nearest_opensky(lat, lng, distance, username, password):
             on_ground=nearest_airplane[8],
             velocity=nearest_airplane[9],
             true_track=nearest_airplane[10],
-            category=OPENSKY_CAT[int(nearest_airplane[16])],
+            category=category_map[int(nearest_airplane[16])],
         )
     return nearest_flight
 
@@ -3352,9 +3272,9 @@ def get_nearest_flightaware(lat, lng, distance, api_key):
 
 
 def get_nearest_tar1090(lat, lng, uri):
+    #Probably only works in local test mode?
     extension = "/data/aircraft.json"
     rep = http.get(uri + extension)
-    print(rep)
     if rep.status_code != 200:
         print("Failed to fetch flights with status code:", rep.status_code)
         return None
@@ -3372,8 +3292,6 @@ def get_nearest_tar1090(lat, lng, uri):
                 min_distance = distance
                 nearest_airplane = airplane
     
-
-    print(nearest_airplane)
     nearest_flight = dict(
             origin=None,
             destination=None,
@@ -3406,11 +3324,7 @@ def main(config):
     provider = config.get("provider")
     if provider == None:
         print("no provider")
-        return render.Root(
-            child = render.Marquee(
-                child = render.Text("No provider configured"),
-            )
-        )
+        return render.Root(child=render.Marquee(child = render.Text("No provider configured")))
 
     cache_key = "_".join([provider, str(lat), str(lng)])
     flight_cached = cache.get(cache_key)
@@ -3420,15 +3334,24 @@ def main(config):
     else:
         print("Miss! Querying %s" % provider)
         if provider == "flightradar":
-            flightradar_key = config.get("flightradar_api_key")
             if (flightradar_key == "") or (flightradar_key == None):
-                flightradar_key = secret.decrypt("AV6+xWcEFKIfCw67zTcYusGXoTGKrc1bOSIdg8X8UuTkEYMbEdcN67Lh1R8PxQUqFf3QxoXI39bIZz0LV8LgL11JY+/uSxEYPlrVMMEqzJMUJngnn9ZW31mmc5Hk9iNnwgfKAZ6YOadc86TTyR3Pyg78hbUfrE2brp3zYWRpsLrfJpxtIlX4UVlHtuC4qF87pQjyeLQ1wHw=")
+                print("No API Key")
+                return render.Root(child=render.Marquee(child = render.Text("Add Flightradar API Key via RapidAPI")))
             nearest = get_nearest_flightradar(lat, lng, distance, flightradar_key)
         elif provider == "opensky":
+                if not config.get("username") or not config.get("password"):
+                print("No user/pass")
+                return render.Root(child=render.Marquee(child = render.Text("Add OpenSky username and password")))
             nearest = get_nearest_opensky(lat, lng, distance, config.get("username"), config.get("password"))
         elif provider == "flightaware":
+            if not config.get("flightaware_api_key"):
+                print("No API Key")
+                return render.Root(child=render.Marquee(child = render.Text("Add FlightAware API Key")))
             nearest = get_nearest_flightaware(lat, lng, distance, config.get("flightaware_api_key"))
         elif provider == "tar1090":
+            if not config.get("tar1090_uri"):
+                print("No URI")
+                return render.Root(child=render.Marquee(child = render.Text("Add tar1090 URI")))
             nearest = get_nearest_tar1090(lat, lng, config.get("tar1090_uri"))
         else:
             fail("Unknown provider: %s" % provider)
@@ -3526,65 +3449,6 @@ def main(config):
 
 
 
-
-def get_provider_specific(provider):
-    if provider == "flightradar":
-        return [
-            schema.Text(
-                id = "flightradar_key",
-                name = "Flight Radar API key",
-                desc = "Flight Radar API key",
-                icon = "key",
-            ),
-        ]
-    elif provider == "flightaware":
-        return [
-            schema.Text(
-                id = "flightaware_username",
-                name = "FlightAware username",
-                desc = "FlightAware username",
-                icon = "user",
-            ),
-            schema.Text(
-                id = "flightaware_password",
-                name = "FlightAware password",
-                desc = "FlightAware password",
-                icon = "key",
-            ),
-        ]
-    elif provider == "opensky":
-        return [
-            schema.Text(
-                id = "opensky_username",
-                name = "OpenSky username",
-                desc = "OpenSky username",
-                icon = "key",
-            ),
-            schema.Text(
-                id = "opensky_password",
-                name = "OpenSky password",
-                desc = "OpenSky password",
-                icon = "key",
-            ),
-        ]
-    elif provider == "adsbexchange":
-        return [
-            schema.Text(
-                id = "adsbexchange_username",
-                name = "ADS-B Exchange username",
-                desc = "ADS-B Exchange username",
-                icon = "key",
-            ),
-            schema.Text(
-                id = "adsbexchange_password",
-                name = "ADS-B Exchange password",
-                desc = "ADS-B Exchange password",
-                icon = "key",
-            ),
-        ]
-    else:
-        return []
-
 def get_schema():
     provider_options = [
         schema.Option(
@@ -3654,6 +3518,12 @@ def get_schema():
                 options = distance_options,
             ),
             schema.Text(
+                id = "flightradar_api_key",
+                name = "FlightRadar API Key",
+                desc = "API Key for FlightRadar via RapidAPI",
+                icon = "key",
+            ),
+            schema.Text(
                 id = "username",
                 name = "Username",
                 desc = "Username for OpenSky",
@@ -3669,12 +3539,6 @@ def get_schema():
                 id = "flightaware_api_key",
                 name = "FlightAware API Key",
                 desc = "API Key for FlightAware",
-                icon = "key",
-            ),
-            schema.Text(
-                id = "flightradar_api_key",
-                name = "FlightRadar API Key",
-                desc = "API Key for FlightRadar via RapidAPI",
                 icon = "key",
             ),
             schema.Text(
