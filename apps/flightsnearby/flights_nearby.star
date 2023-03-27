@@ -3056,6 +3056,9 @@ def create_bounding_box(latitude, longitude, radius_km):
     # Compute the bounding box of a circle with a given latitude, longitude, and radius in kilometers
     # https://stackoverflow.com/questions/1253499/simple-calculations-for-working-with-lat-lon-km-distance
     #lat_rad, lon_rad = coordinates_to_radians(latitude, longitude)
+    latitude = reduce_accuracy(latitude)
+    longitude = reduce_accuracy(longitude)
+
     lat_rad = deg_to_rad(latitude)
     lon_rad = deg_to_rad(longitude)
     radius_rad = radius_km / R
@@ -3180,7 +3183,8 @@ def get_nearest_flightradar(lat, lng, distance, api_key):
         headers = {"X-RapidAPI-Key": api_key, "X-RapidAPI-Host": "flight-radar1.p.rapidapi.com"},
     )
     if rep.status_code != 200:
-        fail("Failed to fetch flights with status code:", rep.status_code)
+        print("Failed to fetch flights with status code:", rep.status_code)
+        return None
     print(rep)
 
     min_distance = float("inf")
@@ -3252,7 +3256,8 @@ def get_nearest_opensky(lat, lng, distance, username, password):
     )
     print(rep)
     if rep.status_code != 200:
-        fail("Failed to fetch flights with status code:", rep.status_code)
+        print("Failed to fetch flights with status code:", rep.status_code)
+        return None
     data = rep.json()
 
     min_distance = float("inf")
@@ -3302,7 +3307,8 @@ def get_nearest_flightaware(lat, lng, distance, api_key):
     )
     print(rep)
     if rep.status_code != 200:
-        fail("Failed to fetch flights with status code:", rep.status_code)
+        print("Failed to fetch flights with status code:", rep.status_code)
+        return None
     
     min_distance = float("inf")
     nearest_airplane = None
@@ -3345,16 +3351,66 @@ def get_nearest_flightaware(lat, lng, distance, api_key):
         return None
 
 
+def get_nearest_tar1090(lat, lng, uri):
+    extension = "/data/aircraft.json"
+    rep = http.get(uri + extension)
+    print(rep)
+    if rep.status_code != 200:
+        print("Failed to fetch flights with status code:", rep.status_code)
+        return None
+    data = rep.json()
+
+    min_distance = float("inf")
+    nearest_airplane = None
+
+    if not data["aircraft"]:
+        return None
+    for airplane in data["aircraft"]:
+        if "lat" in airplane and airplane["lat"] and "lon" in airplane and airplane["lon"]:
+            distance = compute_distance_km(float(lat), float(lng), airplane["lat"],  airplane["lon"])
+            if distance < min_distance:
+                min_distance = distance
+                nearest_airplane = airplane
+    
+
+    print(nearest_airplane)
+    nearest_flight = dict(
+            origin=None,
+            destination=None,
+            flightNumber=nearest_airplane["flight"],
+            aircraftType=None,
+            airline=nearest_airplane["flight"][:2] if nearest_airplane["flight"] else None,
+            airlineTail=None,
+            icao24=nearest_airplane["hex"],
+            callsign=nearest_airplane["flight"],
+            origin_country=None,
+            time_position=None,
+            longitude=nearest_airplane["lon"],
+            latitude=nearest_airplane["lat"],
+            altitude=nearest_airplane["alt_baro"],
+            on_ground=None,
+            velocity=nearest_airplane["gs"],
+            true_track=nearest_airplane["track"],
+            category=nearest_airplane["category"],
+        )
+    return nearest_flight
+
+
 def main(config):
     location = json.decode(config.get("location", DEFAULT_LOCATION))
-    lat_full_accuracy = float(location["lat"])
-    lng_full_accuracy = float(location["lng"])
-    lat = reduce_accuracy(lat_full_accuracy)
-    lng = reduce_accuracy(lng_full_accuracy)
+    lat = float(location["lat"])
+    lng = float(location["lng"])
     distance = float(config.get("distance", DEFAULT_DISTANCE))
 
 
     provider = config.get("provider")
+    if provider == None:
+        print("no provider")
+        return render.Root(
+            child = render.Marquee(
+                child = render.Text("No provider configured"),
+            )
+        )
 
     cache_key = "_".join([provider, str(lat), str(lng)])
     flight_cached = cache.get(cache_key)
@@ -3372,8 +3428,10 @@ def main(config):
             nearest = get_nearest_opensky(lat, lng, distance, config.get("username"), config.get("password"))
         elif provider == "flightaware":
             nearest = get_nearest_flightaware(lat, lng, distance, config.get("flightaware_api_key"))
+        elif provider == "tar1090":
+            nearest = get_nearest_tar1090(lat, lng, config.get("tar1090_uri"))
         else:
-            nearest = None
+            fail("Unknown provider: %s" % provider)
 
         if nearest:
             cache.set(cache_key, json.encode(nearest), ttl_seconds = DEFAULT_CACHE)
@@ -3382,7 +3440,7 @@ def main(config):
         print("Nearest:", nearest)
         airlineTail = get_airline_tail(nearest["airline"])
         airplane_shape = get_airplane_shape(nearest)
-        distance = compute_distance_km(lat_full_accuracy, lng_full_accuracy, nearest["latitude"], nearest["longitude"])
+        distance = compute_distance_km(lat, lng, nearest["latitude"], nearest["longitude"])
         nearest['distance'] = distance
         if "airline" in nearest and nearest["airline"] in TAILS:
             ico = airlineTail
@@ -3541,6 +3599,10 @@ def get_schema():
             display = "FlightAware AeroAPI",
             value = "flightaware",
         ),
+        schema.Option(
+            display = "tar1090",
+            value = "tar1090",
+        ),
     ]
 
     distance_options = [
@@ -3613,6 +3675,12 @@ def get_schema():
                 id = "flightradar_api_key",
                 name = "FlightRadar API Key",
                 desc = "API Key for FlightRadar via RapidAPI",
+                icon = "key",
+            ),
+            schema.Text(
+                id = "tar1090_uri",
+                name = "tar1090 URI",
+                desc = "full URI to tar1090 instance",
                 icon = "key",
             ),
         ],
